@@ -1,20 +1,22 @@
 #!/usr/bin/env node
 
-import { program } from 'commander';
+import { Command } from 'commander';
+import genDiff from '../src/index.js';
+
+const program = new Command();
 
 program
   .name('gendiff')
-  .version('0.0.2', '-V, --version', 'output the version number')
   .description('Compares two configuration files and shows a difference.')
+  .version('1.0.0', '-V, --version', 'output the version number')
+  .argument('<filepath1>')
+  .argument('<filepath2>')
   .option('-h, --help', 'output usage information')
   .option('-f, --format [type]', 'output format')
-  .arguments('<filepath1> <filepath2>');
-
-if (process.argv.includes('-h') || process.argv.includes('--help')) {
-  program.help();
-} else {
-  program.parse(process.argv);
-}
+  .action((filepath1, filepath2) => {
+    const option = program.opts();
+    console.log(genDiff(filepath1, filepath2, option.format));
+  });
 
 if (program.args.length < 2) {
   console.error('Error: Missing required arguments.');
