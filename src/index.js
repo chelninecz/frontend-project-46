@@ -1,44 +1,46 @@
 import { cwd } from 'node:process';
 import fs from 'fs';
-import { resolve } from 'node:path';
+import { resolve, extname } from 'node:path';
 import _ from 'lodash';
-import parsesFile from './parser.js';
+import parseData from './parsers.js';
 
 const getFullFilePath = (filepath) => resolve(cwd(), filepath);
 
-const readFile = (filepath) => fs.readFileSync(filepath, 'utf-8');
+const readFile = (filepath) => {
+  const fullPath = getFullFilePath(filepath);
+  const format = extname(fullPath).slice(1);
+  const data = fs.readFileSync(fullPath, 'utf-8');
+  return { data, format };
+};
 
 const genDiff = (filepath1, filepath2) => {
-  const pathFile1 = getFullFilePath(filepath1);
-  const pathFile2 = getFullFilePath(filepath2);
+  const { data: dataFile1, format: formatFile1 } = readFile(filepath1);
+  const { data: dataFile2, format: formatFile2 } = readFile(filepath2);
 
-  const dataFile1 = readFile(pathFile1);
-  const dataFile2 = readFile(pathFile2);
-
-  const parsedDataFile1 = parsesFile(dataFile1);
-  const parsedDataFile2 = parsesFile(dataFile2);
+  const parsedDataFile1 = parseData(dataFile1, formatFile1);
+  const parsedDataFile2 = parseData(dataFile2, formatFile2);
 
   const allKeys = _.union(Object.keys(parsedDataFile1), Object.keys(parsedDataFile2));
-
   const sortedKeys = _.sortBy(allKeys);
 
-  const result = {};
+  let output = '{\n';
 
   sortedKeys.forEach((key) => {
     if (parsedDataFile1[key] && !parsedDataFile2[key]) {
-      result[`- ${key}`] = parsedDataFile1[key];
+      output += ` - ${key}: ${parsedDataFile1[key]}\n`;
     } else if (!parsedDataFile1[key] && parsedDataFile2[key]) {
-      result[`+ ${key}`] = parsedDataFile2[key];
+      if (parsedDataFile2[key] !== undefined) {
+        output += ` + ${key}: ${parsedDataFile2[key]}\n`;
+      }
     } else if (parsedDataFile1[key] !== parsedDataFile2[key]) {
-      result[`- ${key}`] = parsedDataFile1[key];
-      result[`+ ${key}`] = parsedDataFile2[key];
+      output += ` - ${key}: ${parsedDataFile1[key]}\n`;
+      output += ` + ${key}: ${parsedDataFile2[key]}\n`;
     } else {
-      result[`  ${key}`] = `${parsedDataFile1[key]}`;
+      output += `   ${key}: ${parsedDataFile1[key]}\n`;
     }
   });
 
-  const jsonString = JSON.stringify(result, null, 2);
-  const output = jsonString.replace(/"([^"]+)":/g, '$1:');
+  output += '}';
 
   return output;
 };

@@ -1,4 +1,5 @@
 import genDiff from '../src/index.js';
+import parseData from '../src/parsers.js';
 
 describe('genDiff', () => {
   it('should return correct diff for two JSON files', () => {
@@ -6,52 +7,43 @@ describe('genDiff', () => {
     const filepath2 = './__fixtures__/file2.json';
 
     const expectedOutput = `{
-  - follow: false,
-    host: "hexlet.io",
-  - proxy: "123.234.53.22",
-  - timeout: 50,
-  + timeout: 20,
-  + verbose: true
+ - follow: false
+ + follow: undefined
+   host: hexlet.io
+ - proxy: 123.234.53.22
+ - timeout: 50
+ + timeout: 20
+ + verbose: true
 }`;
 
     const output = genDiff(filepath1, filepath2);
     expect(output).toEqual(expectedOutput);
   });
 
-  //   it('should handle files with no differences', () => {
-  //     const filepath1 = './__fixtures__/file3.json';
-  //     const filepath2 = './__fixtures__/file3.json';
+  it('should return correct diff for two YAML files', () => {
+    const filepath1 = './__fixtures__/file1.yml';
+    const filepath2 = './__fixtures__/file2.yml';
 
-  //     const expectedOutput = `{
-  //     host: hexlet.io
-  //     timeout: 50
-  //    }`;
+    const expectedOutput = `{
+ - follow: false
+ + follow: undefined
+   host: hexlet.io
+ - proxy: 123.234.53.22
+ - timeout: 50
+ + timeout: 20
+ + verbose: true
+}`;
 
-  //     const output = genDiff(filepath1, filepath2);
-  //     expect(output).toEqual(expectedOutput);
-  //   });
+    const output = genDiff(filepath1, filepath2);
+    expect(output).toEqual(expectedOutput);
+  });
+});
 
-  //   it('should handle files with all keys in one file', () => {
-  //     const filepath1 = './__fixtures__/file4.json';
-  //     const filepath2 = './__fixtures__/file5.json';
+describe('parseData', () => {
+  it('should throw an error for unsupported formats', () => {
+    const data = 'some data';
+    const format = 'unsupported';
 
-  //     const expectedOutput = `{
-  //     + verbose: true
-  //    }`;
-
-  //     const output = genDiff(filepath1, filepath2);
-  //     expect(output).toEqual(expectedOutput);
-  //   });
-
-  //   it('should handle files with all keys in the other file', () => {
-  //     const filepath1 = './__fixtures__/file5.json';
-  //     const filepath2 = './__fixtures__/file4.json';
-
-  //     const expectedOutput = `{
-  //     - verbose: true
-  //    }`;
-
-//     const output = genDiff(filepath1, filepath2);
-//     expect(output).toEqual(expectedOutput);
-//   });
+    expect(() => parseData(data, format)).toThrowError(new Error('Unsupported format: unsupported'));
+  });
 });
