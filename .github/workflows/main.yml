@@ -28,9 +28,11 @@ jobs:
     - run: npm run lint
     - run: npm test
     - name: Test & publish code coverage
-      uses: paambaati/codeclimate-action@v4.0.0
+      uses: paambaati/codeclimate-action@v4
       env:
+        CI: true
         CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_TOKEN }}
       with:
         coverageCommand: npm run test:coverage
         debug: true
+        verifyDownload: true
