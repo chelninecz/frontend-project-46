@@ -1,32 +1,32 @@
 import { cwd } from 'node:process';
 import fs from 'fs';
 import { resolve, extname } from 'node:path';
-import parsesFile from './parsers.js';
+import parseFile from './parsers.js';
 import compareObjects from './compareObjects.js';
-import formatter from './formatters/stylish.js';
+import formatter from './formatters/index.js';
 
-const getFullFilePath = (filepath) => resolve(cwd(), filepath);
+const getFullFilePath = (filePath) => resolve(cwd(), filePath);
 
-const getFormat = (filepath) => extname(filepath).substring(1);
+const getFileFormat = (filePath) => extname(filePath).substring(1);
 
-const readFile = (filePath) => fs.readFileSync(filePath, 'utf-8');
+const readTextFile = (filePath) => fs.readFileSync(filePath, 'utf-8');
 
-const gendiff = (filepath1, filepath2, formatName = 'stylish') => {
-  const pathFile1 = getFullFilePath(filepath1);
-  const pathFile2 = getFullFilePath(filepath2);
+const gendiff = (filePath1, filePath2, formatName = 'stylish') => {
+  const fullPathFile1 = getFullFilePath(filePath1);
+  const fullPathFile2 = getFullFilePath(filePath2);
 
-  const dataFile1 = readFile(pathFile1);
-  const dataFile2 = readFile(pathFile2);
+  const fileContent1 = readTextFile(fullPathFile1);
+  const fileContent2 = readTextFile(fullPathFile2);
 
-  const formatFile1 = getFormat(filepath1);
-  const formatFile2 = getFormat(filepath2);
+  const fileFormat1 = getFileFormat(filePath1);
+  const fileFormat2 = getFileFormat(filePath2);
 
-  const informationDiff = compareObjects(
-    parsesFile(dataFile1, formatFile1),
-    parsesFile(dataFile2, formatFile2),
+  const diffInformation = compareObjects(
+    parseFile(fileContent1, fileFormat1),
+    parseFile(fileContent2, fileFormat2),
   );
 
-  return formatter(informationDiff, formatName);
+  return formatter(diffInformation, formatName);
 };
 
 export default gendiff;
