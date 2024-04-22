@@ -1,48 +1,32 @@
 import { cwd } from 'node:process';
 import fs from 'fs';
 import { resolve, extname } from 'node:path';
-import _ from 'lodash';
-import parseData from './parsers.js';
+import parsesFile from './parsers.js';
+import compareObjects from './compareObjects.js';
+import formatter from './formatters/stylish.js';
 
 const getFullFilePath = (filepath) => resolve(cwd(), filepath);
 
-const readFile = (filepath) => {
-  const fullPath = getFullFilePath(filepath);
-  const format = extname(fullPath).slice(1);
-  const data = fs.readFileSync(fullPath, 'utf-8');
-  return { data, format };
+const getFormat = (filepath) => extname(filepath).substring(1);
+
+const readFile = (filePath) => fs.readFileSync(filePath, 'utf-8');
+
+const gendiff = (filepath1, filepath2, formatName = 'stylish') => {
+  const pathFile1 = getFullFilePath(filepath1);
+  const pathFile2 = getFullFilePath(filepath2);
+
+  const dataFile1 = readFile(pathFile1);
+  const dataFile2 = readFile(pathFile2);
+
+  const formatFile1 = getFormat(filepath1);
+  const formatFile2 = getFormat(filepath2);
+
+  const informationDiff = compareObjects(
+    parsesFile(dataFile1, formatFile1),
+    parsesFile(dataFile2, formatFile2),
+  );
+
+  return formatter(informationDiff, formatName);
 };
 
-const genDiff = (filepath1, filepath2) => {
-  const { data: dataFile1, format: formatFile1 } = readFile(filepath1);
-  const { data: dataFile2, format: formatFile2 } = readFile(filepath2);
-
-  const parsedDataFile1 = parseData(dataFile1, formatFile1);
-  const parsedDataFile2 = parseData(dataFile2, formatFile2);
-
-  const allKeys = _.union(Object.keys(parsedDataFile1), Object.keys(parsedDataFile2));
-  const sortedKeys = _.sortBy(allKeys);
-
-  let output = '{\n';
-
-  sortedKeys.forEach((key) => {
-    if (parsedDataFile1[key] && !parsedDataFile2[key]) {
-      output += ` - ${key}: ${parsedDataFile1[key]}\n`;
-    } else if (!parsedDataFile1[key] && parsedDataFile2[key]) {
-      if (parsedDataFile2[key] !== undefined) {
-        output += ` + ${key}: ${parsedDataFile2[key]}\n`;
-      }
-    } else if (parsedDataFile1[key] !== parsedDataFile2[key]) {
-      output += ` - ${key}: ${parsedDataFile1[key]}\n`;
-      output += ` + ${key}: ${parsedDataFile2[key]}\n`;
-    } else {
-      output += `   ${key}: ${parsedDataFile1[key]}\n`;
-    }
-  });
-
-  output += '}';
-
-  return output;
-};
-
-export default genDiff;
+export default gendiff;
