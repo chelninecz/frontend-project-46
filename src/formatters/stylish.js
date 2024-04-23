@@ -5,6 +5,10 @@ const indentCharacter = ' ';
 
 const getIndentation = (indentLevel) => {
   const indentSize = indentLevel * spacesPerIndent;
+  return indentCharacter.repeat(indentSize - 2);
+};
+const getIndentationPlus = (indentLevel) => {
+  const indentSize = indentLevel * spacesPerIndent;
   return indentCharacter.repeat(indentSize);
 };
 
@@ -13,12 +17,12 @@ const stringifyData = (data, indentLevel) => {
     return String(data);
   }
   const lines = Object.entries(data).map(
-    ([key, value]) => `${getIndentation(indentLevel + 1)}${key}: ${stringifyData(
+    ([key, value]) => `${getIndentationPlus(indentLevel + 1)}${key}: ${stringifyData(
       value,
       indentLevel + 1,
     )}`,
   );
-  return `{\n${lines.join('\n')}\n${getIndentation(indentLevel)}}`;
+  return `{\n${lines.join('\n')}\n${getIndentationPlus(indentLevel)}}`;
 };
 
 const iterateNodes = (nodes, indentLevel = 1) => nodes.map((node) => {
@@ -43,15 +47,15 @@ const iterateNodes = (nodes, indentLevel = 1) => nodes.map((node) => {
       )}`;
     }
     case 'unchanged':
-      return `${getIndentation(indentLevel)}${node.key}: ${stringifyData(
+      return `${getIndentationPlus(indentLevel)}${node.key}: ${stringifyData(
         node.value,
         indentLevel,
       )}`;
     case 'nested': {
       const lines = iterateNodes(node.children, indentLevel + 1);
-      return `${getIndentation(indentLevel)}${node.key}: {\n${lines.join(
+      return `${getIndentationPlus(indentLevel)}${node.key}: {\n${lines.join(
         '\n',
-      )}\n${getIndentation(indentLevel)}}`;
+      )}\n${getIndentationPlus(indentLevel)}}`;
     }
     default:
       throw new Error(`Unknown type of node '${node.type}'.`);
