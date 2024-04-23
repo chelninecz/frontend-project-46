@@ -7,9 +7,11 @@ const formatter = (tree, formatName) => {
       return formatStylish(tree);
     case 'plain':
       return formatPlain(tree);
+    case 'json':
+      return JSON.stringify(tree);
     default:
       throw new Error(
-        `The ${formatName} format is not supported.\n supported formats: stylish, plain`,
+        `The ${formatName} format is not supported.\n supported formats: stylish, plain, json`,
       );
   }
 };

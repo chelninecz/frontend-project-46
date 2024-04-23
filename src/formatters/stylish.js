@@ -13,25 +13,45 @@ const stringifyData = (data, indentLevel) => {
     return String(data);
   }
   const lines = Object.entries(data).map(
-    ([key, value]) => `${getIndentation(indentLevel + 1)}${key}: ${stringifyData(value, indentLevel + 1)}`,
+    ([key, value]) => `${getIndentation(indentLevel + 1)}${key}: ${stringifyData(
+      value,
+      indentLevel + 1,
+    )}`,
   );
   return `{\n${lines.join('\n')}\n${getIndentation(indentLevel)}}`;
 };
 
-const iterateThroughNodes = (nodes, indentLevel = 1) => nodes.map((node) => {
+const iterateNodes = (nodes, indentLevel = 1) => nodes.map((node) => {
   switch (node.type) {
     case 'deleted':
-      return `${getIndentation(indentLevel)}- ${node.key}: ${stringifyData(node.value, indentLevel)}`;
+      return `${getIndentation(indentLevel)}- ${node.key}: ${stringifyData(
+        node.value,
+        indentLevel,
+      )}`;
     case 'added':
-      return `${getIndentation(indentLevel)}+ ${node.key}: ${stringifyData(node.value, indentLevel)}`;
+      return `${getIndentation(indentLevel)}+ ${node.key}: ${stringifyData(
+        node.value,
+        indentLevel,
+      )}`;
     case 'changed': {
-      return `${getIndentation(indentLevel)}- ${node.key}: ${stringifyData(node.oldValue, indentLevel)}\n${getIndentation(indentLevel)}+ ${node.key}: ${stringifyData(node.newValue, indentLevel)}`;
+      return `${getIndentation(indentLevel)}- ${node.key}: ${stringifyData(
+        node.oldValue,
+        indentLevel,
+      )}\n${getIndentation(indentLevel)}+ ${node.key}: ${stringifyData(
+        node.newValue,
+        indentLevel,
+      )}`;
     }
     case 'unchanged':
-      return `${getIndentation(indentLevel)}${node.key}: ${stringifyData(node.value, indentLevel)}`;
+      return `${getIndentation(indentLevel)}${node.key}: ${stringifyData(
+        node.value,
+        indentLevel,
+      )}`;
     case 'nested': {
-      const lines = iterateThroughNodes(node.children, indentLevel + 1);
-      return `${getIndentation(indentLevel)}${node.key}: {\n${lines.join('\n')}\n${getIndentation(indentLevel)}}`;
+      const lines = iterateNodes(node.children, indentLevel + 1);
+      return `${getIndentation(indentLevel)}${node.key}: {\n${lines.join(
+        '\n',
+      )}\n${getIndentation(indentLevel)}}`;
     }
     default:
       throw new Error(`Unknown type of node '${node.type}'.`);
@@ -39,7 +59,7 @@ const iterateThroughNodes = (nodes, indentLevel = 1) => nodes.map((node) => {
 });
 
 const formatStylish = (tree) => {
-  const result = iterateThroughNodes(tree, 1);
+  const result = iterateNodes(tree, 1);
   return `{\n${result.join('\n')}\n}`;
 };
 
