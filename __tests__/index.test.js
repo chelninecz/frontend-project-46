@@ -222,17 +222,17 @@ describe("parseData", () => {
     const data = "some data";
     const format = "unsupported";
 
-    expect(() => parseData(data, format)).toThrowError(
+    expect(() => parseData(data, format)).toThrow(
       new Error("Unsupported format: unsupported")
     );
   });
 });
 
-describe("parseData", () => {
+describe("check formats", () => {
   it("should throw an error for unsupported formats", () => {
     const formatName = "undefined";
 
-    expect(() => formatter(formatName)).toThrowError(
+    expect(() => formatter(formatName)).toThrow(
       new Error(
         `The ${formatName} format is not supported.\n supported formats: stylish, plain, json`
       )
